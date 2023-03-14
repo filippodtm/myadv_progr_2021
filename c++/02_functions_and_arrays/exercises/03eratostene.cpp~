@@ -1,0 +1,15 @@
+//
+#include <iostream>
+
+int main(){
+  std::cout << "inserisci N: ";
+  int n;
+  std::cin >> n; //a capo poi
+
+  int* numeri {new int[n+1]}; // 0,1,2,...n
+  for (int i{0}; i <=n; ++i)
+    numeri[i] = i;
+  
+  
+
+}

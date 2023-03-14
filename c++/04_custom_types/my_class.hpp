@@ -1,0 +1,18 @@
+//qui in "---".hpp creo solo la classe o la struct e dichiaro la funz
+#pragma once
+
+class point{
+  double x, y;
+public:
+  void print();
+};
+
+
+
+//(oppure invece che pragma once
+// #ifndef _MY_CLASS_H_
+// #define _MY_CLASS_H_
+
+//                      boh?
+
+// #endif /* _MY_CLASS_H_ */     //)
