@@ -1,0 +1,23 @@
+//funziona in teoria
+#include <iostream>
+//NI , provare senza 2i+1
+
+
+int main(){
+  
+  // int k{100};
+  // int* arrayprimi{new int[1]};
+  for(int i=1; i<50 ; ++i){
+    int numdivisori = 0;
+    for(int j=2; j<i; ++j){
+      //int remainder= (2*i +1)%j;
+      if(((2*i +1)%j) == 0){
+	 ++numdivisori;
+  	 break;
+      }
+    }
+    if (numdivisori == 0)
+      std::cout << 2*i+1 << "\n";
+   }
+  return 0;
+}
