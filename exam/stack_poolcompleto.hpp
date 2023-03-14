@@ -1,0 +1,139 @@
+#include <iostream>
+#include <vector>
+#include <memory>
+#include <iterator>
+
+
+template <typename T, typename N = std::size_t>
+class stack_pool{ 
+  struct node_t{
+    T value;
+    N next;
+    //node_t() = default;
+  };
+  
+  std::vector<node_t> pool;
+  using stack_type = N;    //type delle l1, l2
+  using value_type = T;
+  using size_type = typename std::vector<node_t>::size_type;  
+  stack_type free_nodes{0};    // empty at the beginning
+
+  node_t& node(stack_type x) noexcept { return pool[x-1]; }              
+  const node_t& node(stack_type x) const noexcept { return pool[x-1]; }
+
+  
+public:
+  stack_pool() noexcept = default;
+  explicit stack_pool(size_type n): pool{ std::vector<node_t>{} }  {pool.reserve(n); }
+           // reserve n nodes in the pool 
+  
+
+//iterator
+  template <typename S  = std::size_t>
+  class Iterator { 
+    stack_pool* ptr;
+    N current;
+    public:
+    using value_type = S ;
+    using difference_type = std::ptrdiff_t;
+    using iterator_category = std::forward_iterator_tag ; 
+    using reference = value_type&;
+    using pointer = value_type*;
+
+    Iterator(stack_pool* p , N c) : ptr{p}, current{c} {}
+
+    reference operator*(){ return ptr->value(current); }
+    pointer operator->(){ return &**this ; }
+    Iterator& operator++(){
+      current = ptr->next(current) ;
+      return *this;
+    }
+  Iterator operator++(int){    //post increment 
+      auto tmp = *this;
+      ++current;
+      return tmp;
+  }
+  friend bool operator==( const Iterator& a, const Iterator& b) {return a.current==b.current;}  
+  friend bool operator!=( const Iterator& a, const Iterator& b) {return !(a==b);}
+  };
+//fine iteratori
+  
+
+  
+  using iterator = Iterator<T>;
+  using const_iterator = Iterator<const T>;
+
+  iterator begin(stack_type x){return iterator{ this, x};}
+  iterator end(stack_type ){return iterator{ this, stack_type(0)};}
+
+  const_iterator begin(stack_type x) const {return const_iterator{this, x};}
+  const_iterator end(stack_type ) const {return const_iterator{this, stack_type(0)};}
+  
+  const_iterator cbegin(stack_type x) const {return const_iterator{this, x};}
+  const_iterator cend(stack_type ) const {return const_iterator{this,stack_type(0) };}
+
+
+  
+  stack_type new_stack() noexcept {return stack_type(0);}    // return an empty stack
+  void reserve(size_type n) {pool.reserve(n); }  // reserve n nodes in the pool
+  size_type capacity() const noexcept {return pool.capacity(); } 
+
+  bool empty(stack_type x) const noexcept {
+    if (x == end())
+       return true;
+    else
+       return false;
+  }
+  stack_type end() const noexcept { return stack_type(0); }       
+
+  T& value(stack_type x) noexcept {return node(x).value; }    //ok
+  const T& value(stack_type x) const noexcept {return node(x).value; }      //ok
+
+  stack_type& next(stack_type x) noexcept {return node(x).next; }   //ok
+  const stack_type& next(stack_type x) const noexcept {return node(x).next; }      //ok
+
+
+  stack_type push(const T& val, stack_type l){
+    if( free_nodes > end() ) {  //se ci sono freenodes
+      auto tmp = free_nodes;
+      value(free_nodes) = val;
+      free_nodes = next(free_nodes);
+      next(tmp) = l;
+      l = tmp;
+    }
+    else{  //non ci sono free_nodes disponibili
+      pool.push_back( node_t{val, l} );     //costruisco il nodo
+      l = pool.size ;   
+    }
+    return l;
+  }
+  stack_type push(T&& val, stack_type l){
+    if( free_nodes > end()) { //se ci sono freenodes
+      auto tmp = free_nodes;
+      value(free_nodes) = val;
+      free_nodes = next(free_nodes);
+      next(tmp) = l;
+      l = tmp;
+    }
+    else{   //non ci sono free_nodes disponibili
+      pool.push_back( node_t{val, l} );     //costruisco il nodo
+      l = pool.size(); 
+    }
+    return l;
+  }
+
+  stack_type pop(stack_type x){
+    auto tmp = next(x);
+    next(x) = free_nodes;      //aggiungo node(x) ai free nodes:
+    free_nodes = x;
+    return tmp;
+  }
+
+  stack_type free_stack(stack_type x){
+    while(x != end() ){
+      x = pop(x);
+    }
+    return x;
+  }
+};
+
