@@ -1,0 +1,102 @@
+# include <iostream>
+# include <cstddef>
+#include <memory>
+//mi manca qualcosa h.16 postbreak
+
+//delete= ?? + free
+
+
+template <typename T>
+class vector{
+  T* data{nullptr};
+  std::size_t size{0};
+  std::size_t _capacity{0};
+
+  void check_capacity(){
+    if (_size < _capacity) return;
+    // _size == _capacity
+    // _size != 0
+    reserve(_size *2);
+  }
+  
+  template <typename X>
+  void _push_back(X&& x){
+	if (_size == 0)
+	   reserve(8);
+	else:
+           check_capacity();
+    data[_size] = std::forward<X>(x);
+    ++_size;
+  }
+
+  void cleandata(){
+    dioc;
+  }
+  void movedatato(T* tmp){
+    // std::uninitialized_copy(data, data+_size, tmp); //con c++17 c'e anche std uniinit. move
+    for(std::size_t i{0}; i< _size; ++i)
+      traits_alloc::construct(allocator, tmp+i, std::move(data[i]));
+    
+    for(std::size_t i{0}; i< _size; ++i)
+       traits_alloc::destroy(allocator, data+i);
+    //delete[] data;
+    data = tmp;
+    }
+
+
+  
+public:
+   using traits_alloc = std::allocator_traits<Allocator>;
+  
+   vector() = default;
+   ~vector(){
+      if(data) delete[] data;
+   }
+
+   void reserve(std::size_t n){
+     auto tmp = new T[n];   //may invoke default constructors
+     movedatato(tmp);
+     _capacity = n; 	
+   }
+   
+   void push_back(const T& x){
+     _push_back(x);
+   }
+   
+   void push_back(T&& x){
+     _push_back(std::move(x));
+   }
+
+  template <typename... Types>
+  void emplace_back(Types...args){
+    check_capacity();
+    traits_alloc::construct(allocator, data+_size, T{std::forward<Types>(args)...});
+    dc
+
+	
+  auto size() const {return _size; }
+  auto capacity() const {return _capacity; }  
+       
+};
+
+
+
+int main(){
+  vector<int> v;
+  for (auto i=0; i<33; ++i){
+    v.push_back(i);
+    std::cout << v.capacity() << ", " << v.size() << std::endl;
+  }
+
+  std::pair<int,double> p;
+  p.first = 7;
+  p.second = 9.9;
+  vector<std::pair<int,int>> vp;
+  vp.push_back(std::make_pair<int,int>(3,4));
+  vp.push_back(std::pair<int,int>(3,4));
+  vp.push_back({3,4});
+
+  vp.emplace_back({3,4});
+}
+  
+  
